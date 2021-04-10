@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/mainLayout"
+    android:background="#ffffff"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/image_quick"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="40dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/wheel_quick"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@mipmap/walk_quick"
+        />
+
+    <EditText
+        android:id="@+id/text_quick"
+        android:layout_width="160sp"
+        android:layout_height="wrap_content"
+        android:text="빠르게 걷기"
+        android:textSize="20sp"
+        android:textColor="#000"
+        android:gravity="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/wheel_quick"
+        app:layout_constraintTop_toBottomOf="@id/image_quick"
+        />
+
+    <com.urrecliner.walkslowquick.WheelView
+        android:id="@+id/wheel_quick"
+        android:layout_height="160dp"
+        android:layout_width="80dp"
+        app:wv_textSize="24sp"
+        app:wv_textBoundaryMargin="10dp"
+        app:wv_lineSpacing="20dp"
+        app:wv_visibleItems="5"
+        app:wv_selectedItemPosition="4"
+        app:wv_normalItemTextColor="@color/colorPrimaryDark"
+        app:wv_selectedItemTextColor="@color/colorPrimary"
+        app:wv_showDivider="true"
+        app:wv_dividerColor="@color/dividerColor"
+        app:wv_dividerHeight="2dp"
+        app:wv_dividerType="fill"
+        app:wv_drawSelectedRect="true"
+        app:wv_selectedRectColor="@color/selectedRectColor"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/text_quick"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/image_slow"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="40dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/wheel_slow"
+        app:layout_constraintTop_toBottomOf="@id/wheel_quick"
+        android:src="@mipmap/walk_slow"
+        />
+
+    <EditText
+        android:id="@+id/text_slow"
+        android:layout_width="160sp"
+        android:layout_height="wrap_content"
+        android:text="이번엔 천천히"
+        android:textSize="20sp"
+        android:textColor="#000"
+        android:gravity="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/wheel_slow"
+        app:layout_constraintTop_toBottomOf="@id/image_slow"
+        />
+
+    <com.urrecliner.walkslowquick.WheelView
+        android:id="@+id/wheel_slow"
+        android:layout_height="160dp"
+        android:layout_width="80dp"
+        android:layout_marginTop="16dp"
+        app:wv_textSize="24sp"
+        app:wv_textBoundaryMargin="10dp"
+        app:wv_lineSpacing="20dp"
+        app:wv_visibleItems="5"
+        app:wv_selectedItemPosition="4"
+        app:wv_normalItemTextColor="@color/colorPrimaryDark"
+        app:wv_selectedItemTextColor="@color/colorPrimary"
+        app:wv_showDivider="true"
+        app:wv_dividerColor="@color/dividerColor"
+        app:wv_dividerHeight="2dp"
+        app:wv_dividerType="fill"
+        app:wv_drawSelectedRect="true"
+        app:wv_selectedRectColor="@color/selectedRectColor"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/text_slow"
+        app:layout_constraintTop_toBottomOf="@id/wheel_quick"
+        />
+
+    <TextView
+        android:id="@+id/duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:00"
+        android:textSize="32sp"
+        android:textColor="#000"
+        android:layout_marginTop="48dp"
+        app:layout_constraintTop_toBottomOf="@id/wheel_slow"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/startStop"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="#00000000"
+        android:layout_margin="@dimen/fab_margin"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/duration"
+        app:srcCompat="@mipmap/start"
+        android:contentDescription="TODO" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
