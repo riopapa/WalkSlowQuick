@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences.Editor editor;
     String quickText, slowText;
     Timer walkTimer, speakTimer;
+    int loopCount;
+    TextToSpeech textToSpeech;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,12 +85,7 @@ public class MainActivity extends AppCompatActivity {
     private void buildQuickWheel() {
 
         final WheelView<String> wheelView = findViewById(R.id.wheel_quick);
-        wheelView.setOnItemSelectedListener(new WheelView.OnItemSelectedListener<String>() {
-            @Override
-            public void onItemSelected(WheelView<String> wheelView, String data, int position) {
-//                Log.w(TAG, "onItemSelected: data=" + data + ",position=" + position);
-            }
-        });
+        wheelView.setOnItemSelectedListener((wheelView1, data, position) -> { });
         wheelView.setOnWheelChangedListener(new WheelView.OnWheelChangedListener() {
             @Override
             public void onWheelScroll(int scrollOffsetY) { }
@@ -114,12 +111,7 @@ public class MainActivity extends AppCompatActivity {
     private void buildSlowWheel() {
 
         final WheelView<String> wheelView = findViewById(R.id.wheel_slow);
-        wheelView.setOnItemSelectedListener(new WheelView.OnItemSelectedListener<String>() {
-            @Override
-            public void onItemSelected(WheelView<String> wheelView, String data, int position) {
-//                Log.w(TAG, "onItemSelected: data=" + data + ",position=" + position);
-            }
-        });
+        wheelView.setOnItemSelectedListener((wheelView1, data, position) -> { });
         wheelView.setOnWheelChangedListener(new WheelView.OnWheelChangedListener() {
             @Override
             public void onWheelScroll(int scrollOffsetY) { }
@@ -141,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
         wheelView.setPlayVolume(0.2f);
     }
 
-
     void running() {
         duration = 0;
         sec = 0;
@@ -159,11 +150,7 @@ public class MainActivity extends AppCompatActivity {
                         sec = 0;
                     }
                     duration++;
-                    runOnUiThread(new Runnable() {
-                          public void run() {
-                              tVDuration.setText(time2Text(duration));
-                          }
-                    });
+                    runOnUiThread(() -> tVDuration.setText(time2Text(duration)));
                 } else {
                     walkTimer.cancel();
                     walkTimer.purge();
@@ -182,18 +169,12 @@ public class MainActivity extends AppCompatActivity {
 
     private String time2Text(int timeInt) {
         final DecimalFormat df = new DecimalFormat("00");
-        return df.format((int) (timeInt/60)) + ":" + df.format(timeInt % 60);
+        return df.format(timeInt/60) + ":" + df.format(timeInt % 60);
     }
 
     int time2Int(String s) {
-        String a = s.substring(0,2);
-        int i = Integer.parseInt(a);
-        a = s.substring(3);
         return Integer.parseInt(s.substring(0,2)) * 60 + Integer.parseInt(s.substring(3));
     }
-
-    private static int loopCount;
-    TextToSpeech textToSpeech;
 
     void speakText() {
         loopCount = 3;
