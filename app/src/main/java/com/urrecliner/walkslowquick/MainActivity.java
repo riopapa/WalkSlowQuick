@@ -1,45 +1,51 @@
 package com.urrecliner.walkslowquick;
 
+import android.Manifest;
+import android.content.ComponentName;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
-import android.os.VibrationEffect;
-import android.os.Vibrator;
+import android.os.IBinder;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
-
-import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import android.widget.Toast;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    int quickTime, slowTime;
+    static int quickTime, slowTime;
     List<String> timeList;
-    int duration, sec, loopTIme;
-    TextView tVDuration;
-    boolean isQuick, isWalking;
+    static TextView tVDuration;
+    static boolean isWalking;
+    static String quickText, slowText;
     SharedPreferences sharePref;
     SharedPreferences.Editor editor;
-    String quickText, slowText;
-    Timer walkTimer, speakTimer;
-    int loopCount;
-    TextToSpeech textToSpeech;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         TextView tv;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        askPermission();
+
         timeList = new ArrayList<>();
         for (int sec = 10; sec <= 8*60; sec += 10) {
             timeList.add(time2Text(sec));
@@ -57,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         buildQuickWheel();
         buildSlowWheel();
         isWalking = false;
+
         ImageView startStop = findViewById(R.id.startStop);
         startStop.setOnClickListener(new View.OnClickListener() {
             TextView tv;
@@ -65,8 +72,7 @@ public class MainActivity extends AppCompatActivity {
                 if (isWalking) {
                     isWalking = false;
                     startStop.setImageResource(R.mipmap.start);
-                    walkTimer.cancel(); walkTimer.purge();
-                    loopTIme = -1;
+                    stopTimer();
                 } else {
                     isWalking = true;
                     startStop.setImageResource(R.mipmap.stop);
@@ -76,10 +82,21 @@ public class MainActivity extends AppCompatActivity {
                     slowText = tv.getText().toString();
                     editor.putString("quickText", quickText).apply();
                     editor.putString("slowText", slowText).apply();
-                    running();
+//                    bindService(new Intent(MainActivity.this, TimerService.class), sconn , BIND_AUTO_CREATE);
+                    startTimer();
                 }
             }
         });
+    }
+
+    void startTimer() {
+        Intent intent = new Intent(this, TimerService.class);
+        startService(intent);
+    }
+
+    void stopTimer() {
+        Intent intent = new Intent(this, TimerService.class);
+        stopService(intent);
     }
 
     private void buildQuickWheel() {
@@ -133,70 +150,97 @@ public class MainActivity extends AppCompatActivity {
         wheelView.setPlayVolume(0.2f);
     }
 
-    void running() {
-        duration = 0;
-        sec = 0;
-        isQuick = false;
-        walkTimer = new Timer();
-        walkTimer.schedule(new TimerTask() {
-            public void run() {
-                if (isWalking) {
-                    if (sec++ == 0) {
-                        isQuick = !isQuick;
-                        loopTIme = (isQuick) ? quickTime : slowTime;
-                        speakText();
-                        vibratePhone();
-                    } else if (sec == loopTIme) {
-                        sec = 0;
-                    }
-                    duration++;
-                    runOnUiThread(() -> tVDuration.setText(time2Text(duration)));
-                } else {
-                    walkTimer.cancel();
-                    walkTimer.purge();
-                }
-            }
-        }, 1000, 1000);
-
-    }
-    void vibratePhone() {
-        long[] patternQuick = {0, 50, 30, 100, 30, 100, 30, 100, 30, 100, 30, 100, 30, 100, 30, 100};
-        long[] patternSlow =  {0, 50, 500, 30, 500, 30, 500, 30, 500, 30, 500, 30, 500, 30, 500, 30,};
-        Vibrator v = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
-        assert v != null;
-        v.vibrate(VibrationEffect.createWaveform((isQuick) ? patternQuick: patternSlow, -1));
-    }
-
-    private String time2Text(int timeInt) {
+    static String time2Text(int timeInt) {
         final DecimalFormat df = new DecimalFormat("00");
         return df.format(timeInt/60) + ":" + df.format(timeInt % 60);
     }
 
-    int time2Int(String s) {
+    static int time2Int(String s) {
         return Integer.parseInt(s.substring(0,2)) * 60 + Integer.parseInt(s.substring(3));
     }
 
-    void speakText() {
-        loopCount = 3;
-        ready_TTS();
-        speakTimer = new Timer();
-        speakTimer.schedule(new TimerTask() {
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, TimerService.class);
+        stopService(intent);
+        Toast.makeText(getApplicationContext(),"Exit Application",Toast.LENGTH_SHORT).show();
+        finish();
+        new Timer().schedule(new TimerTask() {
             public void run() {
-                if (loopCount-- > 0) {
-                    textToSpeech.speak((isQuick)? quickText:slowText, TextToSpeech.QUEUE_ADD, null, null);
-                } else {
-                    speakTimer.cancel();
-                    speakTimer.purge();
-                    textToSpeech.stop();
-                }
+                finishAffinity();
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(0);
             }
-        }, 2000, 2000);
+        }, 2000);
+
     }
 
-    void ready_TTS() {
-        textToSpeech = new TextToSpeech(getApplicationContext(), status -> textToSpeech.setLanguage(Locale.getDefault()));
-        textToSpeech.setPitch(1.4f);
-        textToSpeech.setSpeechRate(1.3f);
+
+    // ↓ ↓ ↓ P E R M I S S I O N    RELATED /////// ↓ ↓ ↓ ↓
+    ArrayList<String> permissions = new ArrayList<>();
+    private final static int ALL_PERMISSIONS_RESULT = 101;
+    ArrayList permissionsToRequest;
+    ArrayList<String> permissionsRejected = new ArrayList<>();
+
+    private void askPermission() {
+        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+        permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        permissions.add(Manifest.permission.ACCESS_NOTIFICATION_POLICY);
+        permissions.add(Manifest.permission.RECEIVE_BOOT_COMPLETED);
+        permissionsToRequest = findUnAskedPermissions(permissions);
+        if (permissionsToRequest.size() != 0) {
+            requestPermissions((String[]) permissionsToRequest.toArray(new String[0]),
+                    ALL_PERMISSIONS_RESULT);
+        }
     }
+
+    private ArrayList findUnAskedPermissions(@NonNull ArrayList<String> wanted) {
+        ArrayList <String> result = new ArrayList<>();
+        for (String perm : wanted) if (hasPermission(perm)) result.add(perm);
+        return result;
+    }
+    private boolean hasPermission(@NonNull String permission) {
+        return (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == ALL_PERMISSIONS_RESULT) {
+            for (Object perms : permissionsToRequest) {
+                if (hasPermission((String) perms)) {
+                    permissionsRejected.add((String) perms);
+                }
+            }
+            if (permissionsRejected.size() > 0) {
+                if (shouldShowRequestPermissionRationale(permissionsRejected.get(0))) {
+                    String msg = "These permissions are mandatory for the application. Please allow access.";
+                    showDialog(msg);
+                }
+            }
+            else
+                Toast.makeText(getApplicationContext(), "Permissions not granted.", Toast.LENGTH_LONG).show();
+        }
+    }
+    private void showDialog(String msg) {
+        showMessageOKCancel(msg,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        requestPermissions(permissionsRejected.toArray(
+                                new String[0]), ALL_PERMISSIONS_RESULT);
+                    }
+                });
+    }
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new android.app.AlertDialog.Builder(getApplicationContext())
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+// ↑ ↑ ↑ ↑ P E R M I S S I O N    RELATED /////// ↑ ↑ ↑
 
 }
