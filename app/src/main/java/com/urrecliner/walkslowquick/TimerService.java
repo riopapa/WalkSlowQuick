@@ -125,7 +125,6 @@ public class TimerService extends Service {
         speakTimer.schedule(new TimerTask() {
             public void run() {
                 if (loopCount-- > 0) {
-                    Log.w("Speak", (isQuick)? quickText:slowText);
                     textToSpeech.speak((isQuick)? quickText:slowText, TextToSpeech.QUEUE_ADD, null, null);
                 } else {
                     speakTimer.cancel();

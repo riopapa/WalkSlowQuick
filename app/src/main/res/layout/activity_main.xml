@@ -35,7 +35,7 @@
     <com.urrecliner.walkslowquick.WheelView
         android:id="@+id/wheel_quick"
         android:layout_height="160dp"
-        android:layout_width="80dp"
+        android:layout_width="90dp"
         app:wv_textSize="24sp"
         app:wv_textBoundaryMargin="10dp"
         app:wv_lineSpacing="20dp"
@@ -81,7 +81,7 @@
     <com.urrecliner.walkslowquick.WheelView
         android:id="@+id/wheel_slow"
         android:layout_height="160dp"
-        android:layout_width="80dp"
+        android:layout_width="90dp"
         android:layout_marginTop="16dp"
         app:wv_textSize="24sp"
         app:wv_textBoundaryMargin="10dp"
